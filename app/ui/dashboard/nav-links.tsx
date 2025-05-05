@@ -31,9 +31,9 @@ export default function NavLinks() {
             key={link.name}
             href={link.href}
             className={clsx(
-              'flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 p-3 text-sm font-medium hover:bg-sky-100 hover:text-blue-600 md:flex-none md:justify-start md:p-2 md:px-3',
+              'flex h-[48px] grow items-center justify-center gap-2 rounded-md bg-gray-50 dark:bg-gray-800 p-3 text-sm font-medium hover:bg-sky-100 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-white md:flex-none md:justify-start md:p-2 md:px-3 transition-colors text-gray-700 dark:text-white',
               {
-                'bg-sky-100 text-blue-600': pathname === link.href,
+                'bg-sky-100 dark:bg-gray-700 text-blue-600 dark:text-white': pathname === link.href,
               },
             )}
           >
