@@ -21,6 +21,15 @@ const CreateInvoice = FormSchema.omit({ id: true, date: true });
 
 const UpdateInvoice = FormSchema.omit({ id: true, date: true });
 
+const CustomerSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  email: z.string().email(),
+  image_url: z.string(),
+});
+
+const CreateCustomer = CustomerSchema.omit({ id: true });
+
 export async function deleteInvoice(id: string) {
   await sql`DELETE FROM invoices WHERE id = ${id}`;
   revalidatePath('/dashboard/invoices');
@@ -72,4 +81,25 @@ export async function createInvoice(formData: FormData) {
  
   revalidatePath('/dashboard/invoices');
   redirect('/dashboard/invoices');
+}
+
+export async function createCustomer(formData: FormData) {
+  const { name, email, image_url } = CreateCustomer.parse({
+    name: formData.get('name'),
+    email: formData.get('email'),
+    image_url: formData.get('image_url'),
+  });
+
+  try {
+    await sql`
+      INSERT INTO customers (name, email, image_url)
+      VALUES (${name}, ${email}, ${image_url})
+    `;
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw new Error('Failed to create customer.');
+  }
+
+  revalidatePath('/dashboard/customers');
+  redirect('/dashboard/customers');
 }
