@@ -5,6 +5,8 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import postgres from 'postgres';
 import { SquaresPlusIcon } from '@heroicons/react/24/outline';
+import bcrypt from 'bcryptjs';
+import { signOut } from '@/auth';
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
@@ -29,6 +31,14 @@ const CustomerSchema = z.object({
 });
 
 const CreateCustomer = CustomerSchema.omit({ id: true });
+
+const UserSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  email: z.string().email('Invalid email address'),
+  password: z.string().min(6, 'Password must be at least 6 characters'),
+});
+
+const CreateUser = UserSchema;
 
 export async function deleteInvoice(id: string) {
   await sql`DELETE FROM invoices WHERE id = ${id}`;
@@ -84,22 +94,56 @@ export async function createInvoice(formData: FormData) {
 }
 
 export async function createCustomer(formData: FormData) {
-  const { name, email, image_url } = CreateCustomer.parse({
-    name: formData.get('name'),
-    email: formData.get('email'),
-    image_url: formData.get('image_url'),
-  });
+  const name = formData.get('name') as string;
+  const email = formData.get('email') as string;
+  const avatarStyle = formData.get('image_url') as string;
+
+  // Generate avatar URL based on the selected style
+  let imageUrl;
+  if (avatarStyle === 'ui-avatars') {
+    imageUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`;
+  } else {
+    // Default to DiceBear
+    imageUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}`;
+  }
 
   try {
     await sql`
       INSERT INTO customers (name, email, image_url)
-      VALUES (${name}, ${email}, ${image_url})
+      VALUES (${name}, ${email}, ${imageUrl})
+    `;
+    revalidatePath('/dashboard/customers');
+    redirect('/dashboard/customers');
+  } catch (error) {
+    return {
+      message: 'Database Error: Failed to create customer.',
+    };
+  }
+}
+
+export async function createUser(formData: FormData) {
+  const { name, email, password } = CreateUser.parse({
+    name: formData.get('name'),
+    email: formData.get('email'),
+    password: formData.get('password'),
+  });
+
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await sql`
+      INSERT INTO users (name, email, password)
+      VALUES (${name}, ${email}, ${hashedPassword})
     `;
   } catch (error) {
     console.error('Database Error:', error);
-    throw new Error('Failed to create customer.');
+    throw new Error('Failed to create user.');
   }
 
-  revalidatePath('/dashboard/customers');
-  redirect('/dashboard/customers');
+  revalidatePath('/login');
+  redirect('/login');
+}
+
+export async function signOutAction() {
+  await signOut();
+  redirect('/');
 }

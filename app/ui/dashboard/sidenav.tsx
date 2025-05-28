@@ -4,6 +4,7 @@ import Link from 'next/link';
 import NavLinks from '@/app/ui/dashboard/nav-links';
 import AcmeLogo from '@/app/ui/acme-logo';
 import { PowerIcon, SunIcon, MoonIcon } from '@heroicons/react/24/outline';
+import { signOutAction } from '@/app/lib/actions';
 import { useEffect, useState } from 'react';
 
 export default function SideNav() {
@@ -35,7 +36,7 @@ export default function SideNav() {
         href="/"
       >
         <div className="w-32 text-white md:w-40">
-          <AcmeLogo />
+          <AcmeLogo /> 
         </div>
       </Link>
       <div className="flex grow flex-row justify-between space-x-2 md:flex-col md:space-x-0 md:space-y-2">
@@ -55,7 +56,7 @@ export default function SideNav() {
               {darkMode ? 'Light Mode' : 'Dark Mode'}
             </div>
           </button>
-          <form>
+          <form action={signOutAction}>
             <button className="flex h-[48px] w-full grow items-center justify-center gap-2 rounded-md bg-gray-50 dark:bg-gray-800 p-3 text-sm font-medium hover:bg-sky-100 dark:hover:bg-gray-700 hover:text-blue-600 dark:hover:text-blue-400 md:flex-none md:justify-start md:p-2 md:px-3 transition-colors text-gray-700 dark:text-gray-300">
               <PowerIcon className="w-6" />
               <div className="hidden md:block">Sign Out</div>
