@@ -1,4 +1,3 @@
-## Professional invoice management system
 # 💼 Professional Invoice Management System
 
 A sleek and modern web application to manage client invoices with ease. Built using **Next.js**, **PostgreSQL**, **Tailwind CSS**, and secured with **NextAuth**, this system allows businesses to efficiently create, read, update, and delete invoices through a clean user interface.
